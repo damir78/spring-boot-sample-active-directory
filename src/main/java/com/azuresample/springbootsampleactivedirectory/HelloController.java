@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -15,18 +18,9 @@ public class HelloController {
 
   @GetMapping("camunda")
   @ResponseBody
-  @PreAuthorize("hasRole('ROLE_camunda')")
+  @PreAuthorize("hasRole('ROLE_camunda-admin')")
   public String camundaAdmin() {
-
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    Object principal = authentication.getPrincipal();
-    DefaultOidcUser user = (DefaultOidcUser) principal;
-
-    Map<String, Object> attributes = user.getAttributes();
-    String preferredUsername = user.getAttribute("preferred_username");
-
-    return "Hello Camunda Admin User [with roles]:" + preferredUsername + " "
-        + authentication.getAuthorities() + ", attributes: " + attributes;
+    return "Hello Camunda Admin User!";
   }
 
   @GetMapping("group1")
@@ -41,5 +35,35 @@ public class HelloController {
   @PreAuthorize("hasRole('ROLE_group2')")
   public String group2() {
     return "Hello Group 2 Users!";
+  }
+
+  @GetMapping("/")
+  @ResponseBody
+  public String root() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Object principal = authentication.getPrincipal();
+    DefaultOidcUser user = (DefaultOidcUser) principal;
+
+    Map<String, Object> attributes = user.getAttributes();
+    String preferredUsername = user.getAttribute("preferred_username");
+
+    StringBuilder result = new StringBuilder();
+    result.append("<p>")
+        .append("User [with roles]:").append(preferredUsername)
+        .append(" ").append(authentication.getAuthorities())
+        .append("</p>");
+    result.append("<ul>");
+
+    List<String> sortedKeys = new ArrayList<>(attributes.keySet());
+    Collections.sort(sortedKeys);
+
+    for (String key : sortedKeys) {
+      result.append("<li>")
+          .append(key).append(": ")
+          .append(attributes.get(key))
+          .append("</li>");
+    }
+    result.append("</ul>");
+    return result.toString();
   }
 }
