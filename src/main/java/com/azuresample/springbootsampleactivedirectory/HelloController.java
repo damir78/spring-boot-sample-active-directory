@@ -3,7 +3,6 @@ package com.azuresample.springbootsampleactivedirectory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -22,13 +21,12 @@ public class HelloController {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     Object principal = authentication.getPrincipal();
     DefaultOidcUser user = (DefaultOidcUser) principal;
-    OidcUserInfo userInfo = user.getUserInfo();
-    Map<String, Object> claims = user.getClaims();
-    String email = user.getEmail();
+
     Map<String, Object> attributes = user.getAttributes();
     String preferredUsername = user.getAttribute("preferred_username");
 
-    return "Hello Camunda Admin User [with roles]:" + preferredUsername + " " + authentication.getAuthorities();
+    return "Hello Camunda Admin User [with roles]:" + preferredUsername + " "
+        + authentication.getAuthorities() + ", attributes: " + attributes;
   }
 
   @GetMapping("group1")
